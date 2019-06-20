@@ -358,7 +358,7 @@ void touchRead(void)
         //     event forwarding (sorta)
 void presets_apply(uint16_t p_keyword) 
       {
-	  uint8_t i, x; 
+	  uint16_t i, x; 
  
 	  for (i = 0; i < 16; i++)     
 		  {
