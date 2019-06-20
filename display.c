@@ -92,8 +92,6 @@
    uint8_t uart_packet[64];
    volatile uint8_t uart_cache[64];
    
-	
-uint16_t ttl_overflows;
 
 
 uint8_t readBtns(uint16_t x, uint16_t y)
