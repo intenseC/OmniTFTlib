@@ -288,8 +288,6 @@ void touchRead(void)
 		case 3:				  
       if(c)  
 		  {
-	  //coords = 0;
-      //  coords = read_adc(CH1);
 	  coords = (uint32_t )read_adc(CH1) << 16;
                          
   	   //  X_minus   -  and reset (PC6)  - set as output   ;     Y_plus   -  input
