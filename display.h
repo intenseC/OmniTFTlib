@@ -23,12 +23,12 @@
 
      bool busy = 0; 
 
-unsigned char YP = (1 << PC3);
-unsigned char XM = (1 << PC2);
-unsigned char XP = (1 << PA1);
-unsigned char YM = (1 << PA0);
-unsigned char CH0 = 0;
-unsigned char CH1 = 1;
+uint8_t YP = (1 << PC3);
+uint8_t XM = (1 << PC2);
+uint8_t XP = (1 << PA1);
+uint8_t YM = (1 << PA0);
+uint8_t CH0 = 0;
+uint8_t CH1 = 1;
  
 #define  TOUCHPORT_A  PORTA
 #define  TOUCHPIN_A DDRA
