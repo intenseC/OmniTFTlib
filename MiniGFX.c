@@ -18,8 +18,6 @@
    #include <stdbool.h>
    #include <stdlib.h>
    #include <string.h>
-   // #include <avr/pgmspace.h>
-   //   #include "TFT.h"
 
    #ifdef ADAFONTS
    #include "gfxfont.h"  
@@ -28,12 +26,7 @@
 
    #endif
    #include "MiniGFX.h"
-   // #include "hallfetica_normal.h"
-
-    //        #include "OCR_A_Extended_M.h"
-
-   // #include "DotMatrix_M_Slash.h"
-    // #include "Retro16x32.h"
+   
     #define boolean bool
    #define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
    #ifndef min
@@ -84,9 +77,6 @@ cFont cfont;
 #define VGA_TRANSPARENT	0xFFFFFFFF
 
  #define fontbyte(x) pgm_read_byte(&cfont.font[x]) 
- 
-  //  extern const uint8_t OCR_A_Extended_M[];
-  // extern uint8_t hallfetica_normal[];
 	 
 //=========================================================
 void _setFont(const uint8_t * font);
@@ -229,27 +219,7 @@ void writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
 }
 
 
-/*
-// (x,y) is leftmost point; if unsure, calling function
-// should sort endpoints or call drawLine() instead
-void drawFastHLine(int16_t x, int16_t y,
-        int16_t w, uint16_t color) {
-    // Update in subclasses if desired!
-    startWrite();
-    writeLine(x, y, x+w-1, y, color);
-    endWrite();
-}
 
-// (x,y) is topmost point; if unsure, calling function
-// should sort endpoints or call drawLine() instead
-void drawFastVLine(int16_t x, int16_t y,
-        int16_t h, uint16_t color) {
-    // Update in subclasses if desired!
-    startWrite();
-    writeLine(x, y, x, y+h-1, color);
-    endWrite();
-}
-*/
 
 void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
         uint16_t color) {
@@ -814,31 +784,7 @@ void getTextBounds(char *str, int16_t x, int16_t y,
     }
 }
 
-/*
-// Same as above, but for PROGMEM strings
-void getTextBounds(const __FlashStringHelper *str,
-        int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h) {
-    uint8_t *s = (uint8_t *)str, c;
 
-    *x1 = x;
-    *y1 = y;
-    *w  = *h = 0;
-
-    int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
-
-    while((c = pgm_read_byte(s++)))
-        charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
-
-    if(maxx >= minx) {
-        *x1 = minx;
-        *w  = maxx - minx + 1;
-    }
-    if(maxy >= miny) {
-        *y1 = miny;
-        *h  = maxy - miny + 1;
-    }
-}
-*/
 #endif
 
 // Return the size of the display (per current rotation)
