@@ -322,7 +322,7 @@ void touchRead(void)
 
 
  void numprint( uint32_t num, uint8_t base) {
- char buf[9] = {}; 
+ char buf[9] = {0}; 
  itoa(num, buf + 1, base);   buf[0] = ' ';      
  print(buf);
  }
@@ -334,7 +334,7 @@ void touchRead(void)
 
    void uart_transmit(unsigned char *data)
 {
-	unsigned char i;
+	uint8_t i;
     	for (i = 0; i < (UART_PKTSIZE); i++)
 	{  
 	while (!( UCSRA & (1 << UDRE)) );            // wait while register is free
@@ -345,7 +345,7 @@ void touchRead(void)
 
      void draw_btns(uint8_t y, uint16_t color_0, uint16_t color_1)
       {
-      unsigned char i, x = 4;
+      uint8_t i, x = 4;
      if (!y) y = 4;
 	for (i = 0; i < 3; i++)     {
 	fillRoundRect(x, y, 102, 75, 7, color_1);
