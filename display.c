@@ -510,29 +510,17 @@ while(1)
 			   if ( uart_pkt_rdy == 1)  { uart_pkt_rdy = 0; // new uart packet was just received
 		      }
          	   #endif
-		  } 
+	      } 
 	   } 
 	}
-		}
+     }
            /*  secondary tick   */
-		cnt = 1; 
+		
 	 if (TCNT2 >= 250) 
-		 {
-		 ttl_overflows ++; 
-	 if (ttl_overflows >= 50) 
-		 {
-		 ttl_overflows = 0;
-     
-   /* place some of your code here mb */
-   
-	switch (cnt) 
-	{
-	case 0: fillRect(20, 20, 60, 30, RED);
-	break;
-	case 1:
- 	break;
-                                     }
-		                          }
+		       {
+		 
+   /* do some work here mb */  
+		 
                        }
                 }
          }
