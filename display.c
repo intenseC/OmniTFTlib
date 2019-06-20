@@ -462,7 +462,7 @@ int main(void)
 /**/
 while(1)
 {           
-          // main tick routine
+          // primary tick routine
 	if(TIFR & (1 << OCF2)) {  TIFR = (1 << OCF2);   // 250 kHz
 	if( ++fract_count == 25 ) // 0.1 ms / 10 kHz   25
 	    {
