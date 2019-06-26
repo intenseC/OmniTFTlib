@@ -10,4 +10,3 @@ And I added there delayless touchpad polling as well.
 
 WinAVR required to compile the whole thing.
 
-Ah, and hope you find it handy.
