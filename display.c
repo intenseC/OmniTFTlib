@@ -1,7 +1,7 @@
 /*
-* TFT Display Handling app for AVR Atmega32
+*  TFT Display Handling app for AVR Atmega32
 *  
-* written  by V. 'Larry' Beliacoff 
+*  written  by Simon  Katznelson 
 *  x3merz@gmail.com
 */
 
@@ -58,11 +58,11 @@
 
 
 /*   LCD_D6, LCD_D7, LCD_WR and LCD_RS are also serve as touchscreen pins.   */
-#ifdef S6D0154
+ #ifdef S6D0154
  bool forceAltTouchPin = 1;
-#else
+ #else
  bool forceAltTouchPin = 0;
-#endif
+ #endif
  uint8_t tsPinArr;
 
  uint32_t coords;
@@ -71,7 +71,7 @@
  volatile uint8_t ms_cnt = 0, s_cnt = 0, ns_cnt = 0, fract_count;
  volatile bool reading = 0, flip = 0;
  int mode;
-  uint8_t pos = 0;
+ uint8_t pos = 0;
  uint8_t  push, touchcount, draw_consum, fill_consum = 0;
  bool keypress = 0;
  uint32_t IC_CODE; //Stores Driver IC ID 
@@ -80,10 +80,10 @@
  
  uint8_t code [4];
 
-#ifdef EEP
+ #ifdef EEP
  volatile unsigned EEMEM char ID [4];
  unsigned EEMEM long TFTID [4];
-#endif
+ #endif
    
    volatile uint8_t uart_byte_count = 0;
    bool uart_busybit = 0;
@@ -126,7 +126,7 @@ timer_init (void)
     // initialize counter
     TCNT1 = 0;
     // enable overflow interrupt
-	 // initialize overflow counter variable
+    // initialize overflow counter variable
     ttl_overflows = 0;
 
 	TCCR2 |= (1 << WGM21) | (1 << CS21);
@@ -145,9 +145,9 @@ void init_io(void)
 	/* first set all pins to input */
     
 	
-	PORTA = 0xFF;   													/* activate all pull-ups */
+    PORTA = 0xFF;   													/* activate all pull-ups */
     DDRA = 0xFF;    														/* all pins are output */
-	PORTB = 0xFF;   													/* activate all pull-ups */
+    PORTB = 0xFF;   													/* activate all pull-ups */
     DDRB = 0x00;       													/* all pins input */
     PORTC = 0xFF;   													/* activate all pull-ups */
     DDRC = 0xFF;   													/* pins are output */
@@ -167,7 +167,7 @@ void TSinit(void)
  {
 	  if(id == 0x0154 || id == 0x9328 || forceAltTouchPin)  // driver == ID_S6D0154
       {
-       YP = (1 << PC3);     
+           YP = (1 << PC3);     
 	   XM = (1 << PC4);  
 	   XP =  (1 << PA7);   
 	   YM = (1 << PA6);  
@@ -196,7 +196,7 @@ ISR (USART_RXC_vect)
 	  uart_busy = 50;
 	  uart_cache[uart_byte_count++] = UDR;
       
-	  if ( uart_byte_count == UART_PKTSIZE )
+	  if( uart_byte_count == UART_PKTSIZE )
 	 { uart_byte_count = 0;  uart_pkt_rdy = 1;  }  // the last byte of packet received
 }
 
@@ -205,7 +205,7 @@ ISR (USART_RXC_vect)
 // Read the AD conversion result
  unsigned int read_adc(unsigned char adc_input) 
 	  {
-		   #ifdef __TST
+	   #ifdef __TST
 		uint16_t v = 0, i = 0;
         while(i < 5)
 		  {
