@@ -1,7 +1,7 @@
 /*
-* TFT Display Handling app header
+*  TFT Display Handling app header
 *
-* written  by V. 'Larry' Beliacoff
+*  written  by Simon  Katznelson
 *  x3merz@gmail.com
 */
    
