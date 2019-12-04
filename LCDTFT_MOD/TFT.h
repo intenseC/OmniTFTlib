@@ -3,7 +3,7 @@
  *  TFT.h
  *  Adafruit_TFTLCD plain C port for an AVR GCC
  *  Created: 25.6.2017 12:48:21
- *  Authors: Adafruit team, Larry_!
+ *  Authors: Adafruit team, Simon  Katznelson
  *   x3merz@gmail.com
  */ 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
