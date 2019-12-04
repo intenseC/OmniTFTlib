@@ -5,7 +5,7 @@
 *  based on Adafruit team TFT Lib for Arduino
 *  C++ classes stripped, functions reorganized
 *  and then it all ported to C for an bare AVR MCU
-*   V. 'Larry' Beliacoff 
+*   Simon  Katznelson
 *   x3merz@gmail.com
 *
   */
