@@ -4,7 +4,7 @@
 *  largely based on Adafruit team TFT Lib, 
 *  I also rewrote the Henning Karlsen's UTFT fonts handler  
 *  and ported it all to C for bare AVR MCU
-*   V. 'Larry' Beliacoff 
+*   Simon  Katznelson 
 *   x3merz@gmail.com
 *
   */
