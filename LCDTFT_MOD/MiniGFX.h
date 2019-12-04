@@ -3,7 +3,7 @@
 *
 *  based on Adafruit team TFT Lib,
 *  ported to C for bare AVR MCU
-*   V. 'Larry' Beliacoff 
+*   Simon  Katznelson
 *   x3merz@gmail.com
 *
   */
