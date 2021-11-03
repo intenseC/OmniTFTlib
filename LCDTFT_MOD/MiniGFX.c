@@ -786,24 +786,21 @@ void _printChar(char c, int x, int y) {
 	uint8_t i, ch;
 	uint16_t j;
 	uint16_t temp; 
-		           // some thoughts on this function:
+		        // some thoughts on this function:
 			temp = ((c - cfont.offset) * ((cfont.x_size / 8) * cfont.y_size)) + 4;  // letter vertical position in the font array
-			for(j = 0; j < ((cfont.x_size / 8) * cfont.y_size); j += (cfont.x_size / 8))  // setting the letter window size
-			    {
-				for (int zz = (cfont.x_size / 8) - 1; zz >= 0; zz--)  // this fills letterbox in passes, one byte per each pass
-				        {       // (applies 8-bit horizontal part of a letter per cicle), i. e. 16-bit wide letter will take two passes
+			for(j = 0; j < ((cfont.x_size / 8) * cfont.y_size); j += (cfont.x_size / 8))  { // setting the letter window size
+				for (int zz = (cfont.x_size / 8) - 1; zz >= 0; zz--) { // this fills letterbox in passes, one byte per each pass
+				        // (applies 8-bit horizontal part of a letter per cicle), i. e. 16-bit wide letter will take two passes
 				  	ch = pgm_read_byte(&cfont.font[temp + zz]);
-					
-					for(i = 0; i < 8; i++)
-					                    {   
-						if((ch&(1 << i)) != 0)   //anding each bit and filling with color accordingly
-						{            // If got 1 - Foreground color fill
+					for(i = 0; i < 8; i++) {   
+						if((ch & (1 << i)) != 0) {  //anding each bit and filling with color accordingly
+						           // If got 1 - Foreground color fill
  							 writePixel(x - (i - zz * 8), y + (j / (cfont.x_size / 8)), (fch << 8) | fcl); 
-						     }                     // moving 8 * zz pixels left each time 'zz' changes
-						else if (!_transparent)
-						           { // If got 0 - Background color fill
+					}                     // moving 8 * zz pixels left each time 'zz' changes
+						else if (!_transparent) {
+						            // If got 0 - Background color fill
  							 writePixel(x - (i - zz * 8), y + (j / (cfont.x_size / 8)), (bch << 8) | bcl);
-						}   
+			}   
                     } 
                 }
 				temp += (cfont.x_size / 8); // switching to the next letter's part given it's larger than 8 bits
