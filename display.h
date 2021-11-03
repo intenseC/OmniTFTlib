@@ -1,3 +1,8 @@
+
+
+
+
+
 /*
 *  TFT Display Handling app header
 *
@@ -5,37 +10,27 @@
 *  x3merz@gmail.com
 */
    
-          #define  ILI9325          // ILI9341
-	      #define  ILI_AND_MORE
- 	      #define  ID_CHK  // AUTO display driver type chip detect
+#define  ILI9325          // ILI9341
+#define  ILI_AND_MORE
+#define  ID_CHK  // AUTO display driver type chip detect
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   #ifndef ID_CHK    
-		#define id 0x9325  // set display driver type here manually
-   #define readID()   id   // dummy placeholder
-   #define readReg(val)   id    // dummy placeholder
+#ifndef ID_CHK    
+#define id 0x9325  // set display driver type here manually
+#define readID()   id   // dummy placeholder
+#define readReg(val)   id    // dummy placeholder
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   #else 
-     uint32_t id = 0;
-   #endif 
+#endif 
 	 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
-                  #define ILI9341_8BIT    /*  ILI9341 pure SPI mode ON/OFF  */
+#define ILI9341_8BIT    /*  ILI9341 pure SPI mode ON/OFF  */
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-     bool busy = 0; 
 
-uint8_t YP = (1 << PC3);
-uint8_t XM = (1 << PC2);
-uint8_t XP = (1 << PA1);
-uint8_t YM = (1 << PA0);
-uint8_t CH0 = 0;
-uint8_t CH1 = 1;
  
 #define  TOUCHPORT_A  PORTA
 #define  TOUCHPIN_A DDRA
 #define  TOUCHPORT_D  PORTC
 #define  TOUCHPIN_D DDRC
-
-   #define boolean bool
+#define  boolean bool
 
 
                  //Func Prototypes
@@ -67,10 +62,9 @@ uint8_t CH1 = 1;
   void     setAddrWindow(int x1, int y1, int x2, int y2);
   void     pushColors(uint16_t *data, uint8_t len, boolean first);
   void     charBounds(char c, int16_t *x, int16_t *y,
-      int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
+  int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
   void flood(uint16_t color, uint32_t len);
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
