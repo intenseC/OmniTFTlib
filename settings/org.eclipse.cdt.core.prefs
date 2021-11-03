@@ -1,0 +1,17 @@
+doxygen/doxygen_new_line_after_brief=true
+doxygen/doxygen_use_brief_tag=false
+doxygen/doxygen_use_javadoc_tags=true
+doxygen/doxygen_use_pre_tag=false
+doxygen/doxygen_use_structural_commands=false
+eclipse.preferences.version=1
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRDUDEOPTIONS/delimiter=;
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRDUDEOPTIONS/operation=replace
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRDUDEOPTIONS/value=-pm32
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETFCPU/delimiter=;
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETFCPU/operation=replace
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETFCPU/value=1600000
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETMCU/delimiter=;
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETMCU/operation=replace
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/AVRTARGETMCU/value=atmega32
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/append=true
+environment/project/de.innot.avreclipse.configuration.app.debug.1086880129/appendContributed=true
