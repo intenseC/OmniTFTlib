@@ -8,5 +8,5 @@ I occasionally combine things that initially were not intended to.
 This project brings together amazing fonts from the UTFT library and rich LCD support that Adafruit libraries provide.
 And I added there delayless touchpad polling as well.
 
-WinAVR required to compile the whole thing.
+Precompiled binaries included. Eclipse + WinAVR required to recompile the whole thing.
 
