@@ -156,14 +156,13 @@ static void init_io(void)
 
 static void TSinit(void) 
  {
-	  if(id == 0x0154 || id == 0x9328 || forceAltTouchPin)  // driver == ID_S6D0154
-      {
-       YP = (1 << PC3);     
-	   XM = (1 << PC4);  
-	   XP =  (1 << PA7);   
-	   YM = (1 << PA6);  
-	   CH0 = 6;     
-	   CH1 = 7;  
+	  if(id == 0x0154 || id == 0x9328 || forceAltTouchPin)  { // driver == ID_S6D0154
+      	   YP  =  (1 << PC3);     
+	   XM  =  (1 << PC4);  
+	   XP  =  (1 << PA7);   
+	   YM  =  (1 << PA6);  
+	   CH0 =  6;     
+	   CH1 =  7;  
       }
  }
 
