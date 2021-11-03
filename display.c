@@ -326,12 +326,12 @@ static void uart_transmit(unsigned char *data)
     }
 }
 //*****************************************************
-
+// draw buttons recursively
 static void draw_btns(uint8_t y, uint16_t color_0, uint16_t color_1)
 {
-      uint8_t i, x = 4;
+ uint8_t i, x = 4;
      if(!y) y = 4;
-	for (i = 0; i < 3; i++)     {
+	for(i = 0; i < 3; i++)     {
 	fillRoundRect(x, y, 102, 75, 7, color_1);
 	drawRoundRect(x, y, 102, 75, 7, color_0);
 	x += 105;
@@ -346,37 +346,55 @@ static void draw_btns(uint8_t y, uint16_t color_0, uint16_t color_1)
 static void presets_apply(uint16_t p_keyword) 
 {
   uint16_t i, x; 
-	  for (i = 0; i < 16; i++)     
-		  {
-           //check single bit value in the keyword with a bitmask
+	  for (i = 0; i < 16; i++)   {
+           // check single bit value in the keyword with a bitmask
 		   x = (p_keyword >>  i) & 1;   
 		   if(x == 0) continue; else x = i;
-		 // then call an appropriate event
-		 switch (x) {
-		case 0:   setCursor(RIGHT, 130); print("8-bit");   break;
-		case 1:   setColor(WHITE); 
-                  _setFont(OCR_A_Extended_M);
-			      setCursor( 35, 195); print("UTFT library");   break;
-		case 2:   fillScreen(BLACK);  break;
-		case 3:    /* take action according to preset #3 ... */  break;
+		 // then call the appropriate event
+	switch (x) {
+		case 0:
+				 setCursor(RIGHT, 130); print("8-bit");
+				 break;
+		case 1:   
+				setColor(WHITE); 
+                  		_setFont(OCR_A_Extended_M);
+				setCursor( 35, 195); print("UTFT library");
+				 break;
+		case 2:   
+				 fillScreen(BLACK);
+				 break;
+		case 3:
+				 /* take action according to preset #3 etc... */ 
+				 break;
 		case 4: 
-		    setAddrWindow(0, 0, 240, 320);
-            flood(WHITE, 9000);
-		break; 
+		    		setAddrWindow(0, 0, 240, 320);
+                    		flood(WHITE, 9000);
+		 		 break; 
 		case 5:
-		     fillRect(10, 10, 100, 100, BLUE); break;
-		case 6: break;
-		case 7: break;
-		case 8: break;
-		case 9: break; 
-		case 10: break;
-		case 11: break;
-		case 12: break;
-		case 13: break; 
-		case 14: break;
-		case 15: break;
-                    }
-	     }
+		   		fillRect(10, 10, 100, 100, BLUE);
+				 break;
+		case 6:
+				 break;
+		case 7:
+				 break;
+		case 8:
+				 break;
+		case 9:
+				 break; 
+		case 10:
+				 break;
+		case 11:
+				 break;
+		case 12:
+				 break;
+		case 13:
+				 break; 
+		case 14:
+				 break;
+		case 15:
+				 break;
+            }
+	}
 		  
 }
 //*****************************************************
