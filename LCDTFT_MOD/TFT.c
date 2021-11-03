@@ -11,9 +11,18 @@
   */
  
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-     #include "TFT.h"
+#include "TFT.h"
 
-     #define delayMicroseconds(val)  _delay_us(val)  
+  uint8_t  driver = ID_UNKNOWN;
+  int16_t _width, _height,     		  // Display w/h as modified by current rotation
+          cursor_x, cursor_y;
+  uint16_t  textcolor, textbgcolor;
+  uint8_t  textsize,  rotation;
+  bool   wrap, 				  // If set, 'wrap' text at right edge of display
+  _cp437;				  // If set, use correct CP437 charset (default is off)
+
+
+ 
 
    void delay(uint16_t d)
      {
