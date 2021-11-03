@@ -1,4 +1,4 @@
-   /*
+/*
 *  TFT Display init Lib header
 *
 *  based on Adafruit team TFT Lib,
@@ -6,7 +6,7 @@
 *   Simon  Katznelson
 *   x3merz@gmail.com
 *
-  */
+*/
 
  
  //=========================================================      
@@ -31,7 +31,7 @@
 
 #define fontbyte(x) pgm_read_byte(&cfont.font[x])
 
-  #define boolean bool
+#define boolean bool
 
 #define LEFT 0
 #define RIGHT 9999
@@ -121,8 +121,8 @@ void _printChar(char c, int x, int y);
   int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
   void flood(uint16_t color, uint32_t len);
 
- uint16_t readID(void);
- uint32_t readReg(uint8_t r);
+  uint16_t readID(void);
+  uint32_t readReg(uint8_t r);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
