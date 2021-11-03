@@ -349,7 +349,8 @@ static void presets_apply(uint16_t p_keyword)
 	  for (i = 0; i < 16; i++)   {
            // check single bit value in the keyword with a bitmask
 		   x = (p_keyword >>  i) & 1;   
-		   if(x == 0) continue; else x = i;
+		   if(x == 0) continue;
+		   else x = i;
 		 // then call the appropriate event
 	switch (x) {
 		case 0:
@@ -525,3 +526,4 @@ while(1) {
         }
 }
 //***************************************************** /**/
+
