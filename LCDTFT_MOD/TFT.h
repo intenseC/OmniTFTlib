@@ -53,14 +53,7 @@
 #define  TOUCHPORT_D  PORTC
 #define  TOUCHPIN_D   DDRC
 
-#if 0
-unsigned char YP = (1 << PC3);
-unsigned char XM = (1 << PC2);
-unsigned char XP = (1 << PA1);
-unsigned char YM = (1 << PA0);
-unsigned char CH0 = 0;
-unsigned char CH1 = 1;
-#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  // Control signals are ACTIVE LOW (idle is HIGH)
  // Command/Data: LOW = command, HIGH = data
