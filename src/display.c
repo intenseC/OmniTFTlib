@@ -360,7 +360,7 @@ static void presets_apply(uint16_t p_keyword)
 				 break;
 		case 1:   
 				setColor(WHITE); 
-                _setFont(OCR_A_Extended_M);
+                		_setFont(OCR_A_Extended_M);
 				setCursor( 35, 195); print("UTFT library");
 				 break;
 		case 2:   
@@ -424,16 +424,16 @@ int main(void) {
      presets_apply(1); 
 #ifdef DRAWTRISQUARE 
 		fillRoundRect(10, 10, 120, 100, 7, VGA_LIME);
-        fillTriangle(127, 0, 240, 240, 0, 240, BLUE);  
+        	fillTriangle(127, 0, 240, 240, 0, 240, BLUE);  
 #endif
 
 #ifdef ADAFONTS
-           setTextColor(WHITE, WHITE);
-           setFont(&Orbitron_Light_16);
-	       setTextSize(1);
-	       setCursor(10, 30);
-	       write('I'); write('D');
-           setCursor(30, 30);
+           	setTextColor(WHITE, WHITE);
+           	setFont(&Orbitron_Light_16);
+	        setTextSize(1);
+	        setCursor(10, 30);
+	        write('I'); write('D');
+           	setCursor(30, 30);
 #endif
 
   
@@ -494,7 +494,8 @@ while(1) {
 		print("   ");
 #endif
       }        
-		if( ++fivesec > 1 ) { fivesec = 0; // 50 
+		if( ++fivesec > 1 ) {
+		fivesec = 0;
 #ifdef TSTOUCH	   
 		if(busy) continue;
 		itoa(coords >> 16, buf, 10);
