@@ -1,93 +1,92 @@
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+//*****************************************************
     /*
-*  TFT Display init Lib
-*  Created: 25.6.2017 12:48:21
-*  based on Adafruit team TFT Lib for Arduino
-*  C++ classes stripped, functions reorganized
-*  and then it all ported to C for an bare AVR MCU
-*   Simon  Katznelson
-*   x3merz@gmail.com
+*        TFT Display init Lib
+*        Created: 25.6.2017 12:48:21
+*        based on Adafruit team TFT Lib for Arduino
+*        C++ classes stripped, functions reorganized
+*        and then it all ported to C for an bare AVR MCU
+*        Simon  K.
+*        x3merz@intensecircuit.com
 *
   */
- 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//*****************************************************
 #include "TFT.h"
 
-  uint8_t  driver = ID_UNKNOWN;
-  int16_t _width, _height,     		  // Display w/h as modified by current rotation
-          cursor_x, cursor_y;
-  uint16_t  textcolor, textbgcolor;
-  uint8_t  textsize,  rotation;
-  bool   wrap, 				  // If set, 'wrap' text at right edge of display
-  _cp437;				  // If set, use correct CP437 charset (default is off)
+#if 0
+unsigned char YP = (1 << PC3);
+unsigned char XM = (1 << PC2);
+unsigned char XP = (1 << PA1);
+unsigned char YM = (1 << PA0);
+unsigned char CH0 = 0;
+unsigned char CH1 = 1;
+#endif
+
+uint8_t  driver = ID_UNKNOWN;
+int16_t _width, _height,     		  // Display w/h as modified by current rotation
+         cursor_x, cursor_y;
+uint16_t  textcolor, textbgcolor;
+uint8_t  textsize,  rotation;
+bool   wrap, 				  // If set, 'wrap' text at right edge of display
+      _cp437;				  // If set, use correct CP437 charset (default is off)
 
 
- 
 
-   void delay(uint16_t d)
-     {
-     while(d--)
-	     {
-	 _delay_ms (1);
-       }
-     }
 
-   
+static void delay(uint16_t d) {
+  while(d--) _delay_ms(1);
+}
 
-     // Initialization 
-    void tft_init(void) 
-	{
+
+void tft_init(void)
+{
 	CTRL_DIR |=  RD_MASK | WR_MASK | CD_MASK | CS_MASK | RST_MASK;
 	CTRL_PORT |= RD_MASK | WR_MASK | CD_MASK | CS_MASK | RST_MASK;
 	DATA_DIR      |=    0xFF;  // as output
 	DATA_PORT    =   0xFF;   // all pins high / pullups on
-  
-  setWriteDir(); // Set up LCD data port(s) for WRITE operations
+    setWriteDir(); // Set up LCD data port(s) for WRITE operations
+    rotation  = 0;
+    cursor_y  = cursor_x = 0;
+    textsize  = 1;
+    textcolor = 0xFFFF;
+    _width    = TFTWIDTH;
+    _height   = TFTHEIGHT;
 
-  rotation  = 0;
-  cursor_y  = cursor_x = 0;
-  textsize  = 1;
-  textcolor = 0xFFFF;
-  _width    = TFTWIDTH;
-  _height   = TFTHEIGHT;
-
-	 }
-
+}
+//*****************************************************
 
 // Set value of TFT register: 8-bit address, 8-bit value
-  void writeRegister8(uint8_t a, uint8_t d) { 
-  CD_COMMAND; write8(a); CD_DATA; write8(d); }
-
+static   void writeRegister8(uint8_t a, uint8_t d) {
+  CD_COMMAND; write8(a); CD_DATA; write8(d);
+}
+//*****************************************************
 // Set value of TFT register: 16-bit address, 16-bit value
 // See notes at top about macro expansion, hence hi & lo temp vars
-  void writeRegister16(uint16_t a, uint16_t d) { 
-  uint8_t hi, lo; 
-  hi = (a) >> 8; lo = (a); CD_COMMAND; write8(hi); write8(lo); 
-  hi = (d) >> 8; lo = (d); CD_DATA   ; write8(hi); write8(lo); }
-
+static   void writeRegister16(uint16_t a, uint16_t d) {
+  uint8_t hi, lo;
+  hi = (a) >> 8; lo = (a); CD_COMMAND; write8(hi); write8(lo);
+  hi = (d) >> 8; lo = (d); CD_DATA   ; write8(hi); write8(lo);
+}
+//*****************************************************
 // Set value of 2 TFT registers: Two 8-bit addresses (hi & lo), 16-bit value
-  void writeRegisterPair(uint8_t aH, uint8_t aL, uint16_t d) { 
-  uint8_t hi = (d) >> 8, lo = (d); 
-  CD_COMMAND; write8(aH); CD_DATA; write8(hi); 
-  CD_COMMAND; write8(aL); CD_DATA; write8(lo); }
+static   void writeRegisterPair(uint8_t aH, uint8_t aL, uint16_t d) {
+  uint8_t hi = (d) >> 8, lo = (d);
+  CD_COMMAND; write8(aH); CD_DATA; write8(hi);
+  CD_COMMAND; write8(aL); CD_DATA; write8(lo);
+}
+//*****************************************************
 
 
-
-void begin(void) 
-	{
-  	 #ifdef ID_CHK
-     delay(100); //reset();
+void begin(void)  {
+#ifdef ID_CHK
+     delay(100);
  	 id = readID();
-  //  id = 0x9341;
-	 #endif
-
+#endif
 
   uint8_t i = 0;
   reset();
   delay(200);
 
    if((id == 0x9325) || (id == 0x9328)) {
-
     uint16_t a, d;
     driver = ID_932X;
     CS_ACTIVE;
@@ -95,15 +94,17 @@ void begin(void)
       a = pgm_read_word(&ILI932x_regValues[i++]);
       d = pgm_read_word(&ILI932x_regValues[i++]);
       if(a == TFTLCD_DELAY) delay(d);
-      else                  writeRegister16(a, d);
+      else
+          writeRegister16(a, d);
     }
     setRotation(rotation);
     setAddrWindow(0, 0, TFTWIDTH-1, TFTHEIGHT-1);
 
-  } else if (id == 0x9341) {
-      #ifndef  ILI9341_8BIT
-	      //ILI9341 adafruit 
-   //  uint16_t a, d;
+  } else
+      if (id == 0x9341) {
+#ifndef  ILI9341_8BIT
+   // ILI9341 adafruit
+
     driver = ID_9341;
     CS_ACTIVE;
     writeRegister8(ILI9341_SOFTRESET, 0);
@@ -117,18 +118,14 @@ void begin(void)
     writeRegister8(ILI9341_MEMCONTROL, ILI9341_MADCTL_MY | ILI9341_MADCTL_BGR);
     writeRegister8(ILI9341_PIXELFORMAT, 0x55);
     writeRegister16(ILI9341_FRAMECONTROL, 0x001B);
-    
     writeRegister8(ILI9341_ENTRYMODE, 0x07);
-    // writeRegister32(ILI9341_DISPLAYFUNC, 0x0A822700); 
-
     writeRegister8(ILI9341_SLEEPOUT, 0);
     delay(150);
     writeRegister8(ILI9341_DISPLAYON, 0);
     delay(500);
     setAddrWindow(0, 0, TFTWIDTH-1, TFTHEIGHT-1);
     return;
-    /* */
-	    #else
+#else
 // ILI9341 mcufriend (8bit)
 	driver = ID_9341;
 	CS_ACTIVE;
@@ -138,9 +135,6 @@ void begin(void)
 		if(r == TFTLCD_DELAY) {
 			delay(len);
 			} else {
-			//Serial.print("Register $"); Serial.print(r, HEX);
-			//Serial.print(" datalen "); Serial.println(len);
-
 			CS_ACTIVE;
 			CD_COMMAND;
 			write8(r);
@@ -153,11 +147,11 @@ void begin(void)
 
 		    }
 	    }
-		
-                   return;
-        #endif
-  } 
-    #ifdef  ILI_AND_MORE
+
+      return;
+#endif
+  }
+#ifdef  ILI_AND_MORE
    else if (id == 0x8357) {
     // HX8357D
     driver = ID_HX8357D;
@@ -168,9 +162,6 @@ void begin(void)
       if(r == TFTLCD_DELAY) {
 	delay(len);
       } else {
-	//Serial.print("Register $"); Serial.print(r, HEX);
-	//Serial.print(" datalen "); Serial.println(len);
-
 	CS_ACTIVE;
 	CD_COMMAND;
 	write8(r);
@@ -180,26 +171,25 @@ void begin(void)
 	  write8(x);
 	}
 	CS_IDLE;
-
       }
     }
      return;
-     
-  } else if(id == 0x7575) {
 
+  } else
+      if(id == 0x7575) {
     uint8_t a, d;
     driver = ID_7575;
     CS_ACTIVE;
-    while(i < sizeof(HX8347G_regValues)) {
+      while(i < sizeof(HX8347G_regValues)) {
       a = pgm_read_byte(&HX8347G_regValues[i++]);
       d = pgm_read_byte(&HX8347G_regValues[i++]);
       if(a == TFTLCD_DELAY) delay(d);
-      else                  writeRegister8(a, d);
-    }
+      else
+      writeRegister8(a, d);
+      }
     setRotation(rotation);
     setLR(); // Lower-right corner of address window
-
-   }/**/
+    }
    else if(id == 0x0154) {
   //S6D0154
    uint16_t a, d;
@@ -209,11 +199,12 @@ void begin(void)
       a = pgm_read_word(&S6D0154_regValues[i++]);
       d = pgm_read_word(&S6D0154_regValues[i++]);
       if(a == TFTLCD_DELAY) delay(d);
-      else                  writeRegister16(a, d);
+      else
+      writeRegister16(a, d);
     }
    setAddrWindow(0, 0, TFTWIDTH-1, TFTHEIGHT-1);
-  } 
-  /*
+  }
+#if 0
   else if(id == 0x7783) {
   //ST7783
    uint16_t a, d;
@@ -226,15 +217,15 @@ void begin(void)
       else                  writeRegister16(a, d);
     }
    setAddrWindow(0, 0, TFTWIDTH-1, TFTHEIGHT-1);
-  } 
-*/
-  #endif
+  }
+#endif
+#endif
     else {
     driver = ID_UNKNOWN;
     return;
-  }
+    }
 }
-
+//*****************************************************
 
 
 void reset(void) {
@@ -254,15 +245,14 @@ void reset(void) {
   write8(0x00);
   for(uint8_t i = 0; i < 3; i++) WR_STROBE; // Three extra 0x00s
   CS_IDLE;
- 
 }
-
+//*****************************************************
 
 
 // Sets the LCD address window (and address counter, on 932X).
 // Relevant to rect/screen fills and H/V lines.  Input coordinates are
 // assumed pre-sorted (e.g. x2 >= x1).
-    void setAddrWindow(int x1, int y1, int x2, int y2) {
+static   void setAddrWindow(int x1, int y1, int x2, int y2) {
                          if( busy ) return;
 	 CS_ACTIVE;
      if( driver == ID_932X || driver == ID_S6D0154  ) {    //|| driver == ID_ST7781
@@ -275,9 +265,6 @@ void reset(void) {
     // because some users find it disconcerting when a fill does not
     // occur top-to-bottom.
 
-//     if (x1 > x2) _swap_int16_t(x1, x2);
-//     if (y1 > y2) _swap_int16_t(y1, y2);
-	
 	int x, y, t;
     switch(rotation) {
      default:
@@ -318,22 +305,24 @@ void reset(void) {
 	writeRegister16(0x36, x2); //HorizontalEndAddress
 	writeRegister16(0x39, y1); //VerticalStartAddress
 	writeRegister16(0x38, y2); //VertocalEndAddress
-	writeRegister16(0x20, x); //GRAM Address Set
-	writeRegister16(0x21, y);
-	writeRegister8(0x22, 0);
+	writeRegister16(0x20,  x); //GRAM Address Set
+	writeRegister16(0x21,  y);
+	writeRegister8 (0x22,  0);
 	} else {
-    //if( driver == ID_932X ) 
-		writeRegister16(0x0050, x1); // Set address window ,Horizontal and Vertical RAM Address Position (R50h, R51h, R52h, R53h)
+    //if( driver == ID_932X )
+	writeRegister16(0x0050, x1); // Set address window ,Horizontal and Vertical RAM Address Position (R50h, R51h, R52h, R53h)
     writeRegister16(0x0051, x2);
-    //if( driver == ID_932X ) 
-		writeRegister16(0x0052, y1);
+    //if( driver == ID_932X )
+	writeRegister16(0x0052, y1);
     writeRegister16(0x0053, y2);
     writeRegister16(0x0020, x );     // GRAM Address Set (Horizontal Address) (R20h)
     writeRegister16(0x0021, y );    // GRAM Address Set (Vertical Address) (R21h)
 //	if( driver == ID_ST7781 ) writeRegister8(0x22, 0); // Write Data to GRAM (R22h)
 	}
 
-  } else if((driver == ID_9341) || (driver == ID_HX8357D) || (driver == ID_ILI9327) || (driver == ID_ILI9488)){ 
+  } else
+      if((driver == ID_9341) || (driver == ID_HX8357D) ||
+      (driver == ID_ILI9327) || (driver == ID_ILI9488)) {
     uint32_t t;
 
     t = x1;
@@ -346,18 +335,19 @@ void reset(void) {
     writeRegister32(ILI9341_PAGEADDRSET, t); // HX8357D uses same registers!
 
   }
-     #ifdef ILI_AND_MORE
+#ifdef ILI_AND_MORE
    else if(driver == ID_7575) {
 
     writeRegisterPair(HX8347G_COLADDRSTART_HI, HX8347G_COLADDRSTART_LO, x1);
     writeRegisterPair(HX8347G_ROWADDRSTART_HI, HX8347G_ROWADDRSTART_LO, y1);
     writeRegisterPair(HX8347G_COLADDREND_HI  , HX8347G_COLADDREND_LO  , x2);
     writeRegisterPair(HX8347G_ROWADDREND_HI  , HX8347G_ROWADDREND_LO  , y2);
-
-  }/**/
-  #endif
+  }
+#endif
   CS_IDLE;
 }
+//*****************************************************
+
 
 // Unlike the 932X drivers that set the address window to the full screen
 // by default (using the address counter for drawPixel operations), the
@@ -365,20 +355,20 @@ void reset(void) {
 // to save a few register writes on each pixel drawn, the lower-right
 // corner of the address window is reset after most fill operations, so
 // that drawPixel only needs to change the upper left each time.
-void setLR(void) {
-  if( busy ) return;
+static void setLR(void) {
+  if(busy) return;
   CS_ACTIVE;
   writeRegisterPair(HX8347G_COLADDREND_HI, HX8347G_COLADDREND_LO, _width  - 1);
   writeRegisterPair(HX8347G_ROWADDREND_HI, HX8347G_ROWADDREND_LO, _height - 1);
   CS_IDLE;
 }
-
+//*****************************************************
 
 // Fast block fill operation for fillScreen, fillRect, H/V line, etc.
 // Requires setAddrWindow() has previously been called to set the fill
 // bounds.  'len' is inclusive, MUST be >= 1.
-  void flood(uint16_t color, uint32_t len) {
-  if( busy ) return;
+static void flood(uint16_t color, uint32_t len) {
+  if(busy) return;
   uint16_t blocks;
   uint8_t  i, hi = color >> 8,
                 lo = color;
@@ -433,14 +423,11 @@ void setLR(void) {
   }
   CS_IDLE;
 }
+//*****************************************************
 
-
-void drawFastHLine(int16_t x, int16_t y, int16_t length,  uint16_t color)
+static void drawFastHLine(int16_t x, int16_t y, int16_t length,  uint16_t color)
 {
   int16_t x2;
-
- //    if (y > length) _swap_int16_t(y, length);
- 
 
   // Initial off-screen clipping
   if((length <= 0     ) ||
@@ -459,17 +446,15 @@ void drawFastHLine(int16_t x, int16_t y, int16_t length,  uint16_t color)
   setAddrWindow(x, y, x2, y);
   flood(color, length);
   if(driver == ID_932X) setAddrWindow(0, 0, _width - 1, _height - 1);
-  else                  setLR();
+  else
+      setLR();
 }
-/**/
+//*****************************************************
 
 
-void drawFastVLine(int16_t x, int16_t y, int16_t length,   uint16_t color)
+static void drawFastVLine(int16_t x, int16_t y, int16_t length,   uint16_t color)
 {
-    //    if (x > length) _swap_int16_t(x, length);
-  
   int16_t y2;
-
   // Initial off-screen clipping
   if((length <= 0      ) ||
      (x      <  0      ) || ( x                  >= _width) ||
@@ -488,15 +473,14 @@ void drawFastVLine(int16_t x, int16_t y, int16_t length,   uint16_t color)
   if(driver == ID_932X) setAddrWindow(0, 0, _width - 1, _height - 1);
   else                  setLR();
 }
-/**/ /**/
 
+#if 0
 
-/*
 void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,  uint16_t color)
 {
     //  if (x > h)  _swap_int16_t(x, h);
  	//  if (y > w) _swap_int16_t(y, w);
-	
+
 		if(rotation == 1 || rotation == 2)  // landscape?
 		{
 			for (int i = 0; i < ((h - y) / 2) + 1; i++)
@@ -514,14 +498,12 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,  uint16_t color)
 			}
 		}
 	}
-*/
 
-/*
 void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
         uint16_t color) {
 //    if (x > h)  _swap_int16_t(x, h);
 //	if (y > w) _swap_int16_t(y, w);
-	 
+
 	// Update in subclasses if desired!
     startWrite();
     for (int16_t i = x; i < x+w; i++) {
@@ -529,55 +511,10 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
     }
     endWrite();
 }
-   */
+
 
 void fillScreen(uint16_t color) {
-    // Update in subclasses if desired!
-fillRect(0, 0, _width, _height, color);
-//	fillRect(_width, _height, 0, 0,  color);
-}
 
-
-
-void fillRect(int16_t x1, int16_t y1, int16_t w, int16_t h, 
-  uint16_t fillcolor) {
- 
-  int16_t  x2, y2;
-
-  // Initial off-screen clipping
-  if( (w            <= 0     ) ||  (h             <= 0      ) ||
-      (x1           >= _width) ||  (y1            >= _height) ||
-     ((x2 = x1+w-1) <  0     ) || ((y2  = y1+h-1) <  0      )) return;
-  if(x1 < 0) { // Clip left
-    w += x1;
-    x1 = 0;
-  }
-  if(y1 < 0) { // Clip top
-    h += y1;
-    y1 = 0;
-  }
-  if(x2 >= _width) { // Clip right
-    x2 = _width - 1;
-    w  = x2 - x1 + 1;
-  }
-  if(y2 >= _height) { // Clip bottom
-    y2 = _height - 1;
-    h  = y2 - y1 + 1;
-  }
-
-  setAddrWindow(x1, y1, x2, y2);
-  flood(fillcolor, (uint32_t)w * (uint32_t)h);
-  if(driver == ID_932X) setAddrWindow(0, 0, _width - 1, _height - 1);
-  else                 
-	  setLR();
-}
-/**/
-
-
-
-/*
-void fillScreen(uint16_t color) {
-  
   if(driver == ID_932X) {
 
     // For the 932X, a full-screen address window is already the default
@@ -606,8 +543,50 @@ void fillScreen(uint16_t color) {
   }
   flood(color, (long)TFTWIDTH * (long)TFTHEIGHT);
 }
-*/
-void drawPixel(int16_t x, int16_t y, uint16_t color) {
+#endif
+//*****************************************************
+
+void fillScreen(uint16_t color) {
+    // Update in subclasses if desired!
+fillRect(0, 0, _width, _height, color);
+//	fillRect(_width, _height, 0, 0,  color);
+}
+//*****************************************************
+
+
+static void fillRect(int16_t x1, int16_t y1, int16_t w, int16_t h,
+  uint16_t fillcolor) {
+  int16_t  x2, y2;
+  // Initial off-screen clipping
+  if( (w            <= 0     ) ||  (h             <= 0      ) ||
+      (x1           >= _width) ||  (y1            >= _height) ||
+     ((x2 = x1+w-1) <  0     ) || ((y2  = y1+h-1) <  0      )) return;
+  if(x1 < 0) { // Clip left
+    w += x1;
+    x1 = 0;
+  }
+  if(y1 < 0) { // Clip top
+    h += y1;
+    y1 = 0;
+  }
+  if(x2 >= _width) { // Clip right
+    x2 = _width - 1;
+    w  = x2 - x1 + 1;
+  }
+  if(y2 >= _height) { // Clip bottom
+    y2 = _height - 1;
+    h  = y2 - y1 + 1;
+  }
+
+  setAddrWindow(x1, y1, x2, y2);
+  flood(fillcolor, (uint32_t)w * (uint32_t)h);
+  if(driver == ID_932X) setAddrWindow(0, 0, _width - 1, _height - 1);
+  else
+	  setLR();
+}
+//*****************************************************
+
+static void drawPixel(int16_t x, int16_t y, uint16_t color) {
   if( busy ) return;
   // Clip
   if((x < 0) || (y < 0) || (x >= _width) || (y >= _height)) return;
@@ -654,9 +633,9 @@ void drawPixel(int16_t x, int16_t y, uint16_t color) {
   } else if ((driver == ID_9341) || (driver == ID_HX8357D) || (driver == ID_ILI9327) || (driver == ID_ILI9488)) {
     setAddrWindow(x, y, _width-1, _height-1);
     CS_ACTIVE;
-    CD_COMMAND; 
+    CD_COMMAND;
     write8(0x2C);
-    CD_DATA; 
+    CD_DATA;
     write8(color >> 8); write8(color);
   } //else if (driver == ID_S6D0154) {
 	//setAddrWindow(x, y, _width-1, _height-1);
@@ -669,12 +648,13 @@ void drawPixel(int16_t x, int16_t y, uint16_t color) {
 
   CS_IDLE;
 }
+//*****************************************************
 
 // Issues 'raw' an array of 16-bit color values to the LCD; used
 // externally by BMP examples.  Assumes that setWindowAddr() has
 // previously been set to define the bounds.  Max 255 pixels at
 // a time (BMP examples read in small chunks due to limited RAM).
-void pushColors(uint16_t *data, uint8_t len, boolean first) {
+static void pushColors(uint16_t *data, uint8_t len, boolean first) {
  if( busy ) return;
   uint16_t color;
   uint8_t  hi, lo;
@@ -698,30 +678,30 @@ void pushColors(uint16_t *data, uint8_t len, boolean first) {
   }
   CS_IDLE;
 }
-
+//*****************************************************
 
 void setRotation(uint8_t x) {
          if( busy ) return;
- 
+
   // Call parent rotation func first -- sets up rotation flags, etc.
 	rotation = (x & 3);
-    
+
     switch(rotation) {
         case 0:
         case 2:
-      
+
 		    _width  = TFTWIDTH;
             _height = TFTHEIGHT;
             break;
         case 1:
         case 3:
-        
+
 		    _width  = TFTHEIGHT;
             _height = TFTWIDTH;
             break;
     }
 	/* */
-  
+
   // Then perform hardware-specific rotation operations...
 
 
@@ -734,7 +714,7 @@ void setRotation(uint8_t x) {
      default: t = 0x1030; break;
      case 1 : t = 0x1028; break;
      case 2 : t = 0x1000; break;
-     case 3 : t = 0x1018; break;  
+     case 3 : t = 0x1018; break;
     }
    writeRegister16(0x0003, t ); // MADCTL
     // For 932X, init default full-screen address window:
@@ -742,7 +722,7 @@ void setRotation(uint8_t x) {
 
   }
 
-   if (driver == ID_9341) { 
+   if (driver == ID_9341) {
    // MEME, HX8357D uses same registers as 9341 but different values
     uint16_t t= ILI9341_MADCTL_MY | ILI9341_MADCTL_BGR;
 
@@ -780,10 +760,10 @@ void setRotation(uint8_t x) {
     // the lower right is always reset to the corner.
     setLR(); // CS_IDLE happens here
   }
-   if (driver == ID_HX8357D) { 
+   if (driver == ID_HX8357D) {
     // MEME, HX8357D uses same registers as 9341 but different values
     uint16_t t = 0;
-    
+
     switch (rotation) {
       case 2:
         t = HX8357B_MADCTL_RGB;
@@ -802,7 +782,7 @@ void setRotation(uint8_t x) {
     // For 8357, init default full-screen address window:
     setAddrWindow(0, 0, _width - 1, _height - 1); // CS_IDLE happens here
   }
-  
+
    if (driver ==ID_ILI9327) {
 	   // MEME, HX8357D uses same registers as 9341 but different values
 	   uint16_t t = 0;
@@ -826,13 +806,13 @@ void setRotation(uint8_t x) {
 	   setAddrWindow(0, 0, _width - 1, _height - 1); // CS_IDLE happens here
    }
 }
-
+//*****************************************************
 
 // Because this function is used infrequently, it configures the ports for
 // the read operation, reads the data, then restores the ports to the write
 // configuration.  Write operations happen a LOT, so it's advantageous to
 // leave the ports in that state as a default.
-uint16_t readPixel(int16_t x, int16_t y) {
+static uint16_t readPixel(int16_t x, int16_t y) {
      if( busy ) return 0;
   if((x < 0) || (y < 0) || (x >= _width) || (y >= _height)) return 0;
 
@@ -903,23 +883,17 @@ uint16_t readPixel(int16_t x, int16_t y) {
            (           b              >> 3);
   } else return 0;
 }
-
-  #ifdef ILI_AND_MORE
-  ;
-  #endif
-
+//*****************************************************
 #ifdef ID_CHK
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//*****************************************************
 
 // Ditto with the read/write port directions, as above.
-  uint16_t readID(void) {
-
+static   uint16_t readID(void) {
   uint8_t hi, lo;
 
   if (readReg(0x04) == 0x8000) { // eh close enough
     // setc!
-   
+
     writeRegister24(HX8357D_SETC, 0xFF8357);
     delay(300);
     //Serial.println(readReg(0xD0), HEX);
@@ -935,12 +909,12 @@ uint16_t readPixel(int16_t x, int16_t y) {
   if (id == 0x9488) {
 	return 0x9488;
   }
-  
+
   id = readReg(0xEF);
   if (id == 0x9327) {
 	return 0x9327;
   }
-  
+
   CS_ACTIVE;
   CD_COMMAND;
   write8(0x00);
@@ -954,18 +928,14 @@ uint16_t readPixel(int16_t x, int16_t y) {
   setWriteDir();  // Restore LCD data port(s) to WRITE configuration
   CS_IDLE;
 
-  id = hi; id <<= 8; id |= lo;
+  id = hi;
+  id <<= 8;
+  id |= lo;
   return id;
-  
 }
+//*****************************************************
 
-
-
-
- 
- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  uint32_t readReg(uint8_t r) {
+static   uint32_t readReg(uint8_t r) {
   uint32_t id;
   uint8_t x;
 
@@ -992,17 +962,15 @@ uint16_t readPixel(int16_t x, int16_t y) {
 
   return id;
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//*****************************************************
 #endif
-
 // Pass 8-bit (each) R,G,B, get back 16-bit packed color
   uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
+//*****************************************************
 
-
-void writeRegister24(uint8_t r, uint32_t d) {
+static void writeRegister24(uint8_t r, uint32_t d) {
   CS_ACTIVE;
   CD_COMMAND;
   write8(r);
@@ -1014,11 +982,10 @@ void writeRegister24(uint8_t r, uint32_t d) {
   delayMicroseconds(10);
   write8(d);
   CS_IDLE;
-
 }
+//*****************************************************
 
-
-void writeRegister32(uint8_t r, uint32_t d) {
+static void writeRegister32(uint8_t r, uint32_t d) {
   CS_ACTIVE;
   CD_COMMAND;
   write8(r);
@@ -1032,152 +999,156 @@ void writeRegister32(uint8_t r, uint32_t d) {
   delayMicroseconds(10);
   write8(d);
   CS_IDLE;
-
 }
+//*****************************************************
+//*****************************************************
 
+//*****************************************************
+//*****************************************************
 
+//*****************************************************
+//*****************************************************
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization command tables for different LCD controllers
 
 #ifdef ILI_9325D
    static const uint16_t ILI932x_regValues[] PROGMEM =   // ILI 9325D
 	  {
 	0xE5, 0x78F0, // set SRAM internal timing
-	0x01, 0x0100, // set Driver Output Control  
-	0x02, 0x0200, // set 1 line inversion  
-	0x03, 0x1030, // set GRAM write direction and BGR=1.  
-	0x04, 0x0000, // Resize register  
-	0x08, 0x0207, // set the back porch and front porch  
-	0x09, 0x0000, // set non-display area refresh cycle ISC[3:0]  
-	0x0A, 0x0000, // FMARK function  
-	0x0C, 0x0000, // RGB interface setting  
-	0x0D, 0x0000, // Frame marker Position  
-	0x0F, 0x0000, // RGB interface polarity  
-	//*************Power On sequence ****************//  
-	0x10, 0x0000, // SAP, BT[3:0], AP, DSTB, SLP, STB  
-	0x11, 0x0007, // DC1[2:0], DC0[2:0], VC[2:0]  
-	0x12, 0x0000, // VREG1OUT voltage  
-	0x13, 0x0000, // VDV[4:0] for VCOM amplitude  
-	0x07, 0x0001,  
-	TFTLCD_DELAY, 200, // Dis-charge capacitor power voltage  
-	0x10, 0x1690, // SAP, BT[3:0], AP, DSTB, SLP, STB  
-	0x11, 0x0227, // Set DC1[2:0], DC0[2:0], VC[2:0]  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x12, 0x000D, // 0012  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x13, 0x1200, // VDV[4:0] for VCOM amplitude  
-	0x29, 0x000A, // 04  VCM[5:0] for VCOMH  
-	0x2B, 0x000D, // Set Frame Rate  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x20, 0x0000, // GRAM horizontal Address  
-	0x21, 0x0000, // GRAM Vertical Address  
-	// ----------- Adjust the Gamma Curve ----------//  
-	0x30, 0x0000,  
-	0x31, 0x0404,  
-	0x32, 0x0003,  
-	0x35, 0x0405,  
-	0x36, 0x0808,  
-	0x37, 0x0407,  
-	0x38, 0x0303,  
-	0x39, 0x0707,  
-	0x3C, 0x0504,  
-	0x3D, 0x0808,  
-	//------------------ Set GRAM area ---------------//  
-	0x50, 0x0000, // Horizontal GRAM Start Address  
-	0x51, 0x00EF, // Horizontal GRAM End Address  
-	0x52, 0x0000, // Vertical GRAM Start Address  
-	0x53, 0x013F, // Vertical GRAM Start Address  
-	0x60, 0xA700, // Gate Scan Line  
-	0x61, 0x0001, // NDL,VLE, REV   
-	0x6A, 0x0000, // set scrolling line  
-	//-------------- Partial Display Control ---------//  
-	0x80, 0x0000,  
-	0x81, 0x0000,  
-	0x82, 0x0000,  
-	0x83, 0x0000,  
-	0x84, 0x0000,  
-	0x85, 0x0000,  
-	//-------------- Panel Control -------------------//  
-	0x90, 0x0010, 
-	0x92, 0x0000, 
-	0x07, 0x0133,  // 262K color and display ON        
-	
-	// 0xb3, 0x0000,  // CTRL Display  	
-	// 0xb5, 0x0000,  // CABC off   	 
-		  
+	0x01, 0x0100, // set Driver Output Control
+	0x02, 0x0200, // set 1 line inversion
+	0x03, 0x1030, // set GRAM write direction and BGR=1.
+	0x04, 0x0000, // Resize register
+	0x08, 0x0207, // set the back porch and front porch
+	0x09, 0x0000, // set non-display area refresh cycle ISC[3:0]
+	0x0A, 0x0000, // FMARK function
+	0x0C, 0x0000, // RGB interface setting
+	0x0D, 0x0000, // Frame marker Position
+	0x0F, 0x0000, // RGB interface polarity
+	//*************Power On sequence ****************//
+	0x10, 0x0000, // SAP, BT[3:0], AP, DSTB, SLP, STB
+	0x11, 0x0007, // DC1[2:0], DC0[2:0], VC[2:0]
+	0x12, 0x0000, // VREG1OUT voltage
+	0x13, 0x0000, // VDV[4:0] for VCOM amplitude
+	0x07, 0x0001,
+	TFTLCD_DELAY, 200, // Dis-charge capacitor power voltage
+	0x10, 0x1690, // SAP, BT[3:0], AP, DSTB, SLP, STB
+	0x11, 0x0227, // Set DC1[2:0], DC0[2:0], VC[2:0]
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x12, 0x000D, // 0012
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x13, 0x1200, // VDV[4:0] for VCOM amplitude
+	0x29, 0x000A, // 04  VCM[5:0] for VCOMH
+	0x2B, 0x000D, // Set Frame Rate
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x20, 0x0000, // GRAM horizontal Address
+	0x21, 0x0000, // GRAM Vertical Address
+	// ----------- Adjust the Gamma Curve ----------//
+	0x30, 0x0000,
+	0x31, 0x0404,
+	0x32, 0x0003,
+	0x35, 0x0405,
+	0x36, 0x0808,
+	0x37, 0x0407,
+	0x38, 0x0303,
+	0x39, 0x0707,
+	0x3C, 0x0504,
+	0x3D, 0x0808,
+	//------------------ Set GRAM area ---------------//
+	0x50, 0x0000, // Horizontal GRAM Start Address
+	0x51, 0x00EF, // Horizontal GRAM End Address
+	0x52, 0x0000, // Vertical GRAM Start Address
+	0x53, 0x013F, // Vertical GRAM Start Address
+	0x60, 0xA700, // Gate Scan Line
+	0x61, 0x0001, // NDL,VLE, REV
+	0x6A, 0x0000, // set scrolling line
+	//-------------- Partial Display Control ---------//
+	0x80, 0x0000,
+	0x81, 0x0000,
+	0x82, 0x0000,
+	0x83, 0x0000,
+	0x84, 0x0000,
+	0x85, 0x0000,
+	//-------------- Panel Control -------------------//
+	0x90, 0x0010,
+	0x92, 0x0000,
+	0x07, 0x0133,  // 262K color and display ON
+
+	// 0xb3, 0x0000,  // CTRL Display
+	// 0xb5, 0x0000,  // CABC off
+
 		  };
 #endif
- 
-	  
-	  
+
+
+
 #if defined ILI_9325C && !defined ILI_9325D
    static const uint16_t ILI932x_regValues[] PROGMEM =   // ILI 9325C
 	  {
     0xE5, 0x78F0, // set SRAM internal timing
-	0x01, 0x0100, // set Driver Output Control  
-	0x02, 0x0700, // set 1 line inversion  
-	0x03, 0x1030, // set GRAM write direction and BGR=1.  
-	0x04, 0x0000, // Resize register  
-	0x08, 0x0207, // set the back porch and front porch  
-	0x09, 0x0000, // set non-display area refresh cycle ISC[3:0]  
-	0x0A, 0x0000, // FMARK function  
-	0x0C, 0x0000, // RGB interface setting  
-	0x0D, 0x0000, // Frame marker Position  
-	0x0F, 0x0000, // RGB interface polarity  
-	//*************Power On sequence ****************//  
-	0x10, 0x0000, // SAP, BT[3:0], AP, DSTB, SLP, STB  
-	0x11, 0x0007, // DC1[2:0], DC0[2:0], VC[2:0]  
-	0x12, 0x0000, // VREG1OUT voltage  
-	0x13, 0x0000, // VDV[4:0] for VCOM amplitude  
-	0x07, 0x0001,  
-	TFTLCD_DELAY, 200, // Dis-charge capacitor power voltage  
-	0x10, 0x1090, // SAP, BT[3:0], AP, DSTB, SLP, STB  
-	0x11, 0x0227, // Set DC1[2:0], DC0[2:0], VC[2:0]  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x12, 0x001F, // 0012  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x13, 0x1500, // VDV[4:0] for VCOM amplitude  
-	0x29, 0x0027, // 04  VCM[5:0] for VCOMH  
-	0x2B, 0x000D, // Set Frame Rate  
-	TFTLCD_DELAY, 50, // Delay 50ms  
-	0x20, 0x0000, // GRAM horizontal Address  
-	0x21, 0x0000, // GRAM Vertical Address  
-	// ----------- Adjust the Gamma Curve ----------//  
-	0x30, 0x0000,  
-	0x31, 0x0707,  
-	0x32, 0x0307,  
-	0x35, 0x0200,  
-	0x36, 0x0008,  
-	0x37, 0x0004,  
-	0x38, 0x0000,  
-	0x39, 0x0707,  
-	0x3C, 0x0002,  
+	0x01, 0x0100, // set Driver Output Control
+	0x02, 0x0700, // set 1 line inversion
+	0x03, 0x1030, // set GRAM write direction and BGR=1.
+	0x04, 0x0000, // Resize register
+	0x08, 0x0207, // set the back porch and front porch
+	0x09, 0x0000, // set non-display area refresh cycle ISC[3:0]
+	0x0A, 0x0000, // FMARK function
+	0x0C, 0x0000, // RGB interface setting
+	0x0D, 0x0000, // Frame marker Position
+	0x0F, 0x0000, // RGB interface polarity
+	//*************Power On sequence ****************//
+	0x10, 0x0000, // SAP, BT[3:0], AP, DSTB, SLP, STB
+	0x11, 0x0007, // DC1[2:0], DC0[2:0], VC[2:0]
+	0x12, 0x0000, // VREG1OUT voltage
+	0x13, 0x0000, // VDV[4:0] for VCOM amplitude
+	0x07, 0x0001,
+	TFTLCD_DELAY, 200, // Dis-charge capacitor power voltage
+	0x10, 0x1090, // SAP, BT[3:0], AP, DSTB, SLP, STB
+	0x11, 0x0227, // Set DC1[2:0], DC0[2:0], VC[2:0]
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x12, 0x001F, // 0012
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x13, 0x1500, // VDV[4:0] for VCOM amplitude
+	0x29, 0x0027, // 04  VCM[5:0] for VCOMH
+	0x2B, 0x000D, // Set Frame Rate
+	TFTLCD_DELAY, 50, // Delay 50ms
+	0x20, 0x0000, // GRAM horizontal Address
+	0x21, 0x0000, // GRAM Vertical Address
+	// ----------- Adjust the Gamma Curve ----------//
+	0x30, 0x0000,
+	0x31, 0x0707,
+	0x32, 0x0307,
+	0x35, 0x0200,
+	0x36, 0x0008,
+	0x37, 0x0004,
+	0x38, 0x0000,
+	0x39, 0x0707,
+	0x3C, 0x0002,
 	0x3D, 0x1D04,
-	//------------------ Set GRAM area ---------------//  
-	0x50, 0x0000, // Horizontal GRAM Start Address  
-	0x51, 0x00EF, // Horizontal GRAM End Address  
-	0x52, 0x0000, // Vertical GRAM Start Address  
-	0x53, 0x013F, // Vertical GRAM Start Address  
-	0x60, 0xA700, // Gate Scan Line  
-	0x61, 0x0001, // NDL,VLE, REV   
-	0x6A, 0x0000, // set scrolling line  
-	//-------------- Partial Display Control ---------//  
-	0x80, 0x0000,  
-	0x81, 0x0000,  
-	0x82, 0x0000,  
-	0x83, 0x0000,  
-	0x84, 0x0000,  
-	0x85, 0x0000,  
-	//-------------- Panel Control -------------------//  
-	0x90, 0x0010,  
-	0x92, 0x0600,  
-	0x07, 0x0133 // 262K color and display ON        
+	//------------------ Set GRAM area ---------------//
+	0x50, 0x0000, // Horizontal GRAM Start Address
+	0x51, 0x00EF, // Horizontal GRAM End Address
+	0x52, 0x0000, // Vertical GRAM Start Address
+	0x53, 0x013F, // Vertical GRAM Start Address
+	0x60, 0xA700, // Gate Scan Line
+	0x61, 0x0001, // NDL,VLE, REV
+	0x6A, 0x0000, // set scrolling line
+	//-------------- Partial Display Control ---------//
+	0x80, 0x0000,
+	0x81, 0x0000,
+	0x82, 0x0000,
+	0x83, 0x0000,
+	0x84, 0x0000,
+	0x85, 0x0000,
+	//-------------- Panel Control -------------------//
+	0x90, 0x0010,
+	0x92, 0x0600,
+	0x07, 0x0133 // 262K color and display ON
 	  };
 #endif
 
 #if !defined ILI_9325D && !defined ILI_9325C
-  static const uint16_t ILI932x_regValues[] PROGMEM = 
+  static const uint16_t ILI932x_regValues[] PROGMEM =
 	  {
   ILI932X_START_OSC        , 0x0001, // Start oscillator
   TFTLCD_DELAY             , 50,     // 50 millisecond delay
@@ -1285,7 +1256,7 @@ static const uint8_t HX8347G_regValues[] PROGMEM = {
   0x1A           , 0x02,
   0x24           , 0x61,
   0x25           , 0x5C,
-  
+
   0x18           , 0x36,
   0x19           , 0x01,
   0x1F           , 0x88,
@@ -1331,7 +1302,7 @@ static const uint8_t HX8357D_regValues[] PROGMEM = {
   HX8357_TEARLINE, 2, 0x00, 0x02,
   HX8357_SLPOUT, 0,
   TFTLCD_DELAY, 150,
-  HX8357_DISPON, 0, 
+  HX8357_DISPON, 0,
   TFTLCD_DELAY, 50,
 };
 
@@ -1353,7 +1324,7 @@ static const uint8_t ILI9327_regValues[] PROGMEM = {
 	0x2B, 5, 0x00, 0x00, 0x01, 0x3F, 0x8F,
 	0x29, 0,
 	0x2C, 0,
-	
+
 };
 
 static const uint8_t ILI9488_regValues[] PROGMEM = {
@@ -1375,7 +1346,7 @@ static const uint8_t ILI9488_regValues[] PROGMEM = {
 	0x29,  0,
 };
 
-static const uint16_t S6D0154_regValues[] PROGMEM = 
+static const uint16_t S6D0154_regValues[] PROGMEM =
 {
   //0x80, 0x008D, //Testkey
   //0x92, 0x0010,
@@ -1414,16 +1385,16 @@ static const uint16_t S6D0154_regValues[] PROGMEM =
    0x56, 0x0303,
    0x57, 0x0303,
    0x58, 0x0010,
-   0x59, 0x1000, 
+   0x59, 0x1000,
    */
    0x07, 0x0012,
    TFTLCD_DELAY , 40,
    0x07, 0x0013,      /*  GRAM Address Set */
    0x07, 0x0017       /*  Display Control  DISPLAY ON */
 };
-       
-	   
-#if 0 
+
+
+#if 0
        static const uint16_t ST7781_regValues[] PROGMEM = {
             0x00FF, 0x0001,     //can we do 0xFF
             0x00F3, 0x0008,
