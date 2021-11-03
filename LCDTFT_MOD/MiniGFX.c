@@ -13,33 +13,31 @@
    
    
    ////////////////////////////////////////////////////////////////////////////////////////////
-    #define ADAFONTS  // enable original Adafruit text handler
+#define ADAFONTS  // enable original Adafruit text handler
    ////////////////////////////////////////////////////////////////////////////////////////////
-   #include <stdbool.h>
-   #include <stdlib.h>
-   #include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-   #ifdef ADAFONTS
-   #include "gfxfont.h"  
-   #include "glcdfont.h"
-   #include "Orbitron_Light_16.h"
+#ifdef ADAFONTS
+#include "gfxfont.h"  
+#include "glcdfont.h"
+#include "Orbitron_Light_16.h"
+#endif
+#include "MiniGFX.h"
+#define boolean bool
+#define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
-   #endif
-   #include "MiniGFX.h"
-   
-    #define boolean bool
-   #define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
-   #ifndef min
-   #define min(a, b) (((a) < (b)) ? (a) : (b))
-   #endif
-
-   #ifndef _swap_int16_t
-   #define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
-   #endif
+#ifndef _swap_int16_t
+#define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; }
+#endif
   
-    #ifdef ADAFONTS
-     GFXfont *gfxFont;
-    #endif
+#ifdef ADAFONTS
+     GFXfont * gfxFont;
+#endif
  /*     UTFT lib port     */
 //////////////////////////////////////////////////////////////////////////////////////////////////////
  extern int mode;
@@ -76,7 +74,7 @@ cFont cfont;
 #define VGA_PURPLE		0x8010
 #define VGA_TRANSPARENT	0xFFFFFFFF
 
- #define fontbyte(x) pgm_read_byte(&cfont.font[x]) 
+#define fontbyte(x) pgm_read_byte(&cfont.font[x]) 
 	 
 //=========================================================
 void _setFont(const uint8_t * font);
@@ -438,7 +436,7 @@ startWrite();
 
 
 // TEXT- AND CHARACTER-HANDLING FUNCTIONS ----------------------------------
-    #ifdef ADAFONTS
+#ifdef ADAFONTS
 // Draw a character
 void drawChar(int16_t x, int16_t y, unsigned char c,
   uint16_t color, uint16_t bg, uint8_t size) {
@@ -593,7 +591,7 @@ void setCursor(int16_t x, int16_t y) {
     cursor_x = x;
     cursor_y = y;
 }
-    #ifdef ADAFONTS
+#ifdef ADAFONTS
 int16_t getCursorX(void)  {
     return cursor_x;
 }
@@ -605,13 +603,7 @@ int16_t getCursorY(void)  {
 void setTextSize(uint8_t s) {
     textsize = (s > 0) ? s : 1;
 }
-/*
-void setTextColor(uint16_t c) {
-    // For 'transparent' background, we'll set the bg
-    // to the same as fg instead of using a flag
-    textcolor = textbgcolor = c;
-}
-*/
+
 void setTextColor(uint16_t c, uint16_t b) {
     textcolor   = c;
     textbgcolor = b;
@@ -625,7 +617,6 @@ uint8_t getRotation(void)  {
     return rotation;
 }
 
-/* */
 
 // Enable (or disable) Code Page 437-compatible charset.
 // There was an error in glcdfont.c for the longest time -- one character
@@ -763,12 +754,12 @@ void invertDisplay(boolean i) {
 #define disp_x_size _width - 1  //TFTWIDTH //
 #define disp_y_size _height - 1 //TFTHEIGHT //
 
-void _setFont(const uint8_t *font)
+void _setFont(const uint8_t * font)
 {
-	cfont.font = font;
-	cfont.x_size = fontbyte(0);
-	cfont.y_size = fontbyte(1);
-	cfont.offset = fontbyte(2);
+	cfont.font     = font;
+	cfont.x_size   = fontbyte(0);
+	cfont.y_size   = fontbyte(1);
+	cfont.offset   = fontbyte(2);
 	cfont.numchars = fontbyte(3);
 }
 
@@ -791,13 +782,11 @@ void setBackColor(uint32_t color)
 }
 
 
-void _printChar(char c, int x, int y)
-      {    
+void _printChar(char c, int x, int y) {    
 	uint8_t i, ch;
 	uint16_t j;
 	uint16_t temp; 
-	
-		                                                    // some thoughts on this function:
+		           // some thoughts on this function:
 			temp = ((c - cfont.offset) * ((cfont.x_size / 8) * cfont.y_size)) + 4;  // letter vertical position in the font array
 			for(j = 0; j < ((cfont.x_size / 8) * cfont.y_size); j += (cfont.x_size / 8))  // setting the letter window size
 			    {
@@ -814,13 +803,13 @@ void _printChar(char c, int x, int y)
 						else if (!_transparent)
 						           { // If got 0 - Background color fill
  							 writePixel(x - (i - zz * 8), y + (j / (cfont.x_size / 8)), (bch << 8) | bcl);
-						     }   
-					     } 
-				     }
+						}   
+                    } 
+                }
 				temp += (cfont.x_size / 8); // switching to the next letter's part given it's larger than 8 bits
-			  }
+        }
 		  
-	  }
+}
 
 
 
